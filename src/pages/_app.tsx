@@ -18,7 +18,7 @@ import { setupIonicReact } from "@ionic/react";
 setupIonicReact();
 
 import type { AppProps } from "next/app";
-import NonSSRWrapper from "@/components/NonSSRWrapper";
+import NonSSRWrapper from "@/components/ui/NonSSRWrapper";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
