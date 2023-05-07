@@ -3,6 +3,18 @@ import ToolbarLayout from "@/layouts/ToolbarLayout";
 import imageCompression from "browser-image-compression";
 import imagePlaceHolder from "../assets/images/image-placeholder.jpg";
 import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
+import {
   IonGrid,
   IonRow,
   IonCol,
@@ -12,8 +24,9 @@ import {
 } from "@ionic/react";
 import { cloudUploadOutline } from "ionicons/icons";
 import { useRef, useState } from "react";
+import { Tag } from "@/types/servicesResponses";
 export const imageUploadOptions = {
-  maxSizeMB: 1,
+  maxSizeMB: 0.6,
   maxWidthOrHeight: 1920,
   useWebWorker: true,
 };
@@ -24,6 +37,7 @@ export default function Home() {
   const [fileMaxSize] = useState(20);
   const [fileAlert, setFileAlert] = useState(false);
   const [uploadedImg, setUploadedImg] = useState(false);
+  const [tags, setTags] = useState<Tag[]>([]);
 
   const onChangeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
@@ -66,7 +80,11 @@ export default function Home() {
         }
       );
       const parsedResponse = await res.json();
-      console.log(parsedResponse);
+      const newTags = parsedResponse.tags.slice(
+        0,
+        parsedResponse.tags.length >= 10 ? 10 : parsedResponse.tags.length
+      );
+      setTags(newTags);
     } catch (error) {
       console.error(error);
     }
@@ -74,7 +92,7 @@ export default function Home() {
 
   return (
     <>
-      <Menu />
+      {/* <Menu /> */}
       <ToolbarLayout title="Image recognition">
         <IonGrid className="main-layout">
           <div className="body">
@@ -87,7 +105,9 @@ export default function Home() {
             </IonRow>
             <IonRow>
               <IonCol>
-                <IonText color="primary">Take or upload a picture</IonText>
+                <IonText color="primary">
+                  <h4>Take or upload a picture</h4>
+                </IonText>
               </IonCol>
             </IonRow>
             <IonRow class="ion-justify-content-center ion-align-items-center">
@@ -130,6 +150,23 @@ export default function Home() {
               </IonCol>
             </IonRow>
           )}
+          {tags.length !== 0 && <IonRow>
+            <IonCol
+              style={{
+                minHeight: 400,
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={tags} height={300}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis fontSize={12} dataKey="tag.en" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="confidence" fill="#3880ff" />
+                </BarChart>
+              </ResponsiveContainer>
+            </IonCol>
+          </IonRow>}
         </IonGrid>
       </ToolbarLayout>
     </>
