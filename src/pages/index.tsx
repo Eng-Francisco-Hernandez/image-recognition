@@ -1,6 +1,7 @@
 import Menu from "@/components/ui/Menu";
 import ToolbarLayout from "@/layouts/ToolbarLayout";
 import imageCompression from "browser-image-compression";
+import imagePlaceHolder from "../assets/images/image-placeholder.jpg";
 import {
   IonGrid,
   IonRow,
@@ -19,7 +20,7 @@ export const imageUploadOptions = {
 
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [profilePicture, setProfilePicture] = useState("");
+  const [picture, setpicture] = useState("");
   const [fileMaxSize] = useState(20);
   const [fileAlert, setFileAlert] = useState(false);
   const [uploadedImg, setUploadedImg] = useState(false);
@@ -35,7 +36,7 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = function (input) {
       if (typeof input.target?.result === "string") {
-        setProfilePicture(input?.target?.result);
+        setpicture(input?.target?.result);
         setUploadedImg(true);
       }
     };
@@ -50,7 +51,26 @@ export default function Home() {
     }
   };
 
-  const submitImage = () => {};
+  const submitImage = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/image-recognition`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageBase64: picture,
+          }),
+        }
+      );
+      const parsedResponse = await res.json();
+      console.log(parsedResponse);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -71,16 +91,12 @@ export default function Home() {
               </IonCol>
             </IonRow>
             <IonRow class="ion-justify-content-center ion-align-items-center">
-              <IonCol size="auto">
+              <IonCol size="auto" className="text-centered">
                 <img
                   className="avatar"
-                  src={
-                    profilePicture
-                      ? profilePicture
-                      : "https://t3.ftcdn.net/jpg/02/48/42/64/360_F_248426448_NVKLywWqArG2ADUxDq6QprtIzsF82dMF.jpg"
-                  }
+                  src={picture ? picture : imagePlaceHolder.src}
                   style={{
-                    maxHeight: 300,
+                    maxHeight: "50vh",
                   }}
                 />
               </IonCol>
