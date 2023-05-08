@@ -5,6 +5,7 @@ Cross-platform application that allows you to upload an image to recognize what 
 ## Project Demo
 
 To see the project go to the next [DEMO LINK](https://image-recognition-eight.vercel.app)
+You can also download the APK file to install in your Android device [BY CLICKING HERE](https://github.com/Eng-Francisco-Hernandez/image-recognition/raw/main/imageRecognition.apk)
 
 ## Installation and Setup Instructions
 
