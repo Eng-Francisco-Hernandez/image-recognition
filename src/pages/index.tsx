@@ -5,9 +5,7 @@ import imagePlaceHolder from "../assets/images/image-placeholder.jpg";
 import {
   BarChart,
   Bar,
-  Cell,
   XAxis,
-  YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
@@ -21,6 +19,8 @@ import {
   IonText,
   IonButton,
   IonIcon,
+  IonAlert,
+  IonSpinner,
 } from "@ionic/react";
 import { cloudUploadOutline } from "ionicons/icons";
 import { useRef, useState } from "react";
@@ -38,6 +38,7 @@ export default function Home() {
   const [fileAlert, setFileAlert] = useState(false);
   const [uploadedImg, setUploadedImg] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [submittingFile, setSubmittingFile] = useState(false);
 
   const onChangeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
@@ -67,6 +68,7 @@ export default function Home() {
 
   const submitImage = async () => {
     try {
+      setSubmittingFile(true);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/image-recognition`,
         {
@@ -85,6 +87,7 @@ export default function Home() {
         parsedResponse.tags.length >= 10 ? 10 : parsedResponse.tags.length
       );
       setTags(newTags);
+      setSubmittingFile(false);
     } catch (error) {
       console.error(error);
     }
@@ -98,27 +101,33 @@ export default function Home() {
           <div className="body">
             <IonRow>
               <IonCol>
-                <IonText color="primary">
-                  <h3 className="text-centered">Welcome</h3>
-                </IonText>
+                <div className="text-container">
+                  <IonText color="primary">
+                    <h3 className="text-centered">Welcome</h3>
+                  </IonText>
+                </div>
               </IonCol>
             </IonRow>
             <IonRow>
               <IonCol>
-                <IonText color="primary">
-                  <h4>Take or upload a picture</h4>
-                </IonText>
+                <div className="text-container">
+                  <IonText color="primary">
+                    To start just take or upload a picture, then hit the submit
+                    button
+                  </IonText>
+                </div>
               </IonCol>
             </IonRow>
             <IonRow class="ion-justify-content-center ion-align-items-center">
               <IonCol size="auto" className="text-centered">
-                <img
-                  className="avatar"
-                  src={picture ? picture : imagePlaceHolder.src}
-                  style={{
-                    maxHeight: "50vh",
-                  }}
-                />
+                <div className="picture-container">
+                  <img
+                    src={picture ? picture : imagePlaceHolder.src}
+                    style={{
+                      maxHeight: "50vh",
+                    }}
+                  />
+                </div>
               </IonCol>
             </IonRow>
           </div>
@@ -136,7 +145,7 @@ export default function Home() {
                 size="small"
                 expand="block"
               >
-                Upload{" "}
+                Upload
                 <IonIcon className="ml-5" icon={cloudUploadOutline}></IonIcon>
               </IonButton>
             </IonCol>
@@ -144,31 +153,47 @@ export default function Home() {
           {uploadedImg && (
             <IonRow>
               <IonCol>
-                <IonButton onClick={submitImage} size="small" expand="block">
-                  Submit
+                <IonButton
+                  disabled={submittingFile}
+                  onClick={submitImage}
+                  size="small"
+                  expand="block"
+                >
+                  {submittingFile ? <IonSpinner></IonSpinner> : "Submit"}
                 </IonButton>
               </IonCol>
             </IonRow>
           )}
-          {tags.length !== 0 && <IonRow>
-            <IonCol
-              style={{
-                minHeight: 400,
-              }}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={tags} height={300}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis fontSize={12} dataKey="tag.en" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="confidence" fill="#3880ff" />
-                </BarChart>
-              </ResponsiveContainer>
-            </IonCol>
-          </IonRow>}
+          {tags.length !== 0 && (
+            <IonRow>
+              <IonCol
+                style={{
+                  minHeight: 400,
+                  background: "#fff",
+                }}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={tags} height={300}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis fontSize={12} dataKey="tag.en" />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="confidence" fill="#3880ff" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </IonCol>
+            </IonRow>
+          )}
         </IonGrid>
       </ToolbarLayout>
+      <IonAlert
+        isOpen={fileAlert}
+        header="Error"
+        subHeader="Max file size reached"
+        message="Please pick a file not greater than 20MB"
+        buttons={["OK"]}
+        onDidDismiss={() => setFileAlert(false)}
+      ></IonAlert>
     </>
   );
 }
